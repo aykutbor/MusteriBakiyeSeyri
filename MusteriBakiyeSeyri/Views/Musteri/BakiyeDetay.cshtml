@@ -1,0 +1,172 @@
+﻿@using Application.DTOs
+@model MusteriBakiyeSeyriDto
+
+@{
+    ViewData["Title"] = "Müşteri Bakiye Detayı";
+}
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 text-primary">@Model.MusteriUnvan Bakiye Detayı</h1>
+            <p class="lead">Müşterinin borç seyrini ve en yüksek borç bakiyesi bilgilerini aşağıda bulabilirsiniz.</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6 offset-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-info">Genel Bilgiler</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Müşteri ID:</strong> <span class="float-right">@Model.MusteriId</span></li>
+                        <li class="list-group-item"><strong>En Yüksek Borç Bakiyesi:</strong> <span class="float-right text-danger font-weight-bold">@Model.EnYuksekBorcBakiye.ToString("C")</span></li>
+                        <li class="list-group-item"><strong>En Yüksek Borç Tarihi:</strong> <span class="float-right">@Model.EnYuksekBorcTarihi.ToShortDateString()</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-info">Bakiye Seyri Grafiği</h5>
+                    <canvas id="bakiyeChart" style="height:450px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-info">Detaylı Bakiye Tablosu</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Bakiye</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.BakiyeSeyri.OrderBy(x => x.Tarih))
+                                {
+                                    <tr class="@(item.Bakiye == Model.EnYuksekBorcBakiye && item.Tarih == Model.EnYuksekBorcTarihi ? "table-danger font-weight-bold" : "")">
+                                        <td>@item.Tarih.ToShortDateString()</td>
+                                        <td>@item.Bakiye.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <a asp-action="Index" class="btn btn-secondary mt-3">Geri Dön</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                                            Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Tarih.ToShortDateString())));
+    var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                                        Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Bakiye)));
+
+    var ctx = document.getElementById('bakiyeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Müşteri Bakiyesi',
+                data: data,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3,
+                fill: false,
+                pointBackgroundColor: function(context) {
+                    var index = context.dataIndex;
+                    var date = new Date(labels[index]);
+                    var maxBorrowDate = new Date('@Model.EnYuksekBorcTarihi.ToShortDateString()'); // Ensure consistent date format
+                    if (date.toDateString() === maxBorrowDate.toDateString() && data[index] === @Model.EnYuksekBorcBakiye) {
+                        return 'red'; // En yüksek borç noktasını kırmızı yap
+                    }
+                    return 'rgb(75, 192, 192)';
+                },
+                pointRadius: function(context) {
+                    var index = context.dataIndex;
+                    var date = new Date(labels[index]);
+                    var maxBorrowDate = new Date('@Model.EnYuksekBorcTarihi.ToShortDateString()');
+                    if (date.toDateString() === maxBorrowDate.toDateString() && data[index] === @Model.EnYuksekBorcBakiye) {
+                        return 7; // En yüksek borç noktasını daha büyük yap
+                    }
+                    return 3;
+                },
+                pointHoverRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Bakiye (TL)',
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Tarih',
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return context.dataset.label + ': ' + context.formattedValue + ' TL';
+                        }
+                    },
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    titleFont: {
+                        size: 16
+                    },
+                    bodyFont: {
+                        size: 14
+                    },
+                    padding: 10
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+}

@@ -1,0 +1,15 @@
+﻿@model dynamic
+
+@{
+    ViewData["Title"] = "Müşteri Bakiye Seyri";
+}
+
+<h1>Müşteri Bakiye Seyri</h1>
+
+<form asp-controller="Musteri" asp-action="GetBakiyeSeyri" method="post">
+    <div class="form-group">
+        <label for="musteriId">Müşteri Seçin:</label>
+        <select name="musteriId" id="musteriId" class="form-control" asp-items="ViewBag.Musteriler"></select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Bakiye Seyrini Göster</button>
+</form>
