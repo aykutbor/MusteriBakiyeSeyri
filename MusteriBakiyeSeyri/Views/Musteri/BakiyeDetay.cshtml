@@ -3,6 +3,12 @@
 
 @{
     ViewData["Title"] = "Müşteri Bakiye Detayı";
+
+    var labelsJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Tarih.ToString("yyyy-MM-dd")));
+
+    var dataJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Bakiye));
 }
 
 <div class="container mt-5">
@@ -83,21 +89,17 @@
         window.onload = function () {
             console.log('Script starting...');
 
-            var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                            Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Tarih.ToString("yyyy-MM-dd"))));
+            var labels = @Html.Raw(labelsJson);
+            var data = @Html.Raw(dataJson);
 
-        var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                        Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Bakiye)));
-
-        console.log('Labels:', labels);
-        console.log('Data:', data);
+            console.log('Labels:', labels);
+            console.log('Data:', data);
 
             var ctx = document.getElementById('bakiyeChart');
-            console.log('Canvas element:', ctx);
 
             if (ctx && labels.length > 0 && data.length > 0) {
                 try {
-                    var chart = new Chart(ctx, {
+                    new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: labels,
