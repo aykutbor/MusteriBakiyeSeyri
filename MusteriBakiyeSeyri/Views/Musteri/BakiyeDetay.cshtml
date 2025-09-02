@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿@using Application.DTOs
+﻿@using Application.DTOs
 @model MusteriBakiyeSeyriDto
 
 @{
@@ -33,7 +33,9 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="card-title text-info">Bakiye Seyri Grafiği</h5>
-                    <canvas id="bakiyeChart" style="height:450px;"></canvas>
+                    <div style="position: relative; height: 450px;">
+                        <canvas id="bakiyeChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,97 +80,101 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-                console.log('Script starting...');
-                var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                                                                                    Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Tarih.ToShortDateString())));
-            var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                                                                        Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Bakiye)));
-            console.log('Labels:', labels);
-            console.log('Data:', data);
-            var maxBorrowAmount = @Model.EnYuksekBorcBakiye;
-            var maxBorrowDateStr = '@Model.EnYuksekBorcTarihi.ToShortDateString()';
+        window.onload = function () {
+            console.log('Script starting...');
 
-                var ctx = document.getElementById('bakiyeChart');
-                console.log('Canvas element:', ctx);
-                if (ctx) {
-                    try {
-                        var chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Müşteri Bakiyesi',
-                            data: data,
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            tension: 0.3,
-                            fill: false,
-                            pointBackgroundColor: 'rgb(75, 192, 192)',
-                            pointRadius: 4,
-                            pointHoverRadius: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            duration: 1000
+            var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Tarih.ToString("yyyy-MM-dd"))));
+
+        var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.BakiyeSeyri.OrderBy(x => x.Tarih).Select(x => x.Bakiye)));
+
+        console.log('Labels:', labels);
+        console.log('Data:', data);
+
+            var ctx = document.getElementById('bakiyeChart');
+            console.log('Canvas element:', ctx);
+
+            if (ctx && labels.length > 0 && data.length > 0) {
+                try {
+                    var chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Müşteri Bakiyesi',
+                                data: data,
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.3,
+                                fill: false,
+                                pointBackgroundColor: 'rgb(75, 192, 192)',
+                                pointRadius: 4,
+                                pointHoverRadius: 10
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Bakiye (TL)',
-                                    font: {
-                                        size: 14
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            animation: {
+                                duration: 1000
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Bakiye (TL)',
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Tarih',
+                                        font: {
+                                            size: 14
+                                        }
                                     }
                                 }
                             },
-                            x: {
-                                title: {
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return context.dataset.label + ': ' + context.formattedValue + ' TL';
+                                        }
+                                    },
+                                    backgroundColor: 'rgba(0,0,0,0.7)',
+                                    titleFont: {
+                                        size: 16
+                                    },
+                                    bodyFont: {
+                                        size: 14
+                                    },
+                                    padding: 10
+                                },
+                                legend: {
                                     display: true,
-                                    text: 'Tarih',
-                                    font: {
-                                        size: 14
-                                    }
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        return context.dataset.label + ': ' + context.formattedValue + ' TL';
-                                    }
-                                },
-                                backgroundColor: 'rgba(0,0,0,0.7)',
-                                titleFont: {
-                                    size: 16
-                                },
-                                bodyFont: {
-                                    size: 14
-                                },
-                                padding: 10
-                            },
-                            legend: {
-                                display: true,
-                                position: 'top',
-                                labels: {
-                                    font: {
-                                        size: 14
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            size: 14
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
-                console.log('Chart created successfully');
-            } catch (error) {
-                console.error('Error creating chart:', error);
+                    });
+                    console.log('Chart created successfully');
+                } catch (error) {
+                    console.error('Error creating chart:', error);
+                }
+            } else {
+                console.warn('Veri eksik veya canvas bulunamadı.');
             }
-        } else {
-            console.error('Canvas element not found');
-        }
+        };
     </script>
 }
