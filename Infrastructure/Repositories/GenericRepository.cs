@@ -17,6 +17,7 @@ namespace Infrastructure.Repositories
         public GenericRepository(ApplicationDbContext context)
         {
             _context = context;
+            _dbSet = _context.Set<T>();
         }
 
         public GenericRepository(ApplicationDbContext context, DbSet<T> dbSet)

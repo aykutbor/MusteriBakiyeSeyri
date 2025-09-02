@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MusteriBakiyeSeyri.Controllers
 {
-    [ApiController]
-    [Route("api/controller")]
     public class MusteriController : Controller
     {
         private readonly IMusteriService _musteriService;
@@ -28,7 +26,7 @@ namespace MusteriBakiyeSeyri.Controllers
         {
             var bakiyeSeyriDto = await _musteriService.GetMusteriBakiyeSeyriAsync(musteriId);
 
-            if(bakiyeSeyriDto == null)
+            if (bakiyeSeyriDto == null)
             {
                 return NotFound();
             }
