@@ -24,7 +24,7 @@ namespace Infrastructure.Data
 
             modelBuilder.Entity<MusteriTanim>(entity =>
             {
-                entity.ToTable("musteri_tanim_table"); // Veritabanındaki tablo adı
+                entity.ToTable("musteri_tanim_table"); 
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("ID");
                 entity.Property(e => e.Unvan).HasColumnName("UNVAN").HasMaxLength(255);
@@ -33,7 +33,7 @@ namespace Infrastructure.Data
 
             modelBuilder.Entity<MusteriFatura>(entity =>
             {
-                entity.ToTable("musteri_fatura_table"); // Veritabanındaki tablo adı
+                entity.ToTable("musteri_fatura_table"); 
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("ID");
                 entity.Property(e => e.MusteriId).HasColumnName("MUSTERI_ID");
@@ -41,11 +41,11 @@ namespace Infrastructure.Data
                 entity.Property(e => e.FaturaTutari).HasColumnName("FATURA_TUTARI").HasColumnType("decimal(18,2)");
                 entity.Property(e => e.OdemeTarihi).HasColumnName("ODEME_TARIHI").HasColumnType("date");
 
-                // İlişki tanımı
+                
                 entity.HasOne(d => d.Musteri)
                       .WithMany(p => p.Faturalar)
                       .HasForeignKey(d => d.MusteriId)
-                      .OnDelete(DeleteBehavior.Restrict); // İlişkili verilerin silinmesini engeller
+                      .OnDelete(DeleteBehavior.Restrict); 
             });
         }
     }

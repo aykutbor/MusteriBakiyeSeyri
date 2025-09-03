@@ -35,7 +35,7 @@ namespace Application.Services
                 return null;
             }
 
-            // Tüm fatura ve ödeme tarihlerini toplayın
+            
             var tumTarihler = musteri.Faturalar
                                     .Select(f => f.FaturaTarihi.Date)
                                     .Concat(musteri.Faturalar.Where(f => f.OdemeTarihi.HasValue).Select(f => f.OdemeTarihi.Value.Date))
@@ -51,12 +51,12 @@ namespace Application.Services
 
             foreach (var tarih in tumTarihler)
             {
-                // Bu tarihe kadar kesilen faturaları ekle
+                
                 currentBakiye += musteri.Faturalar
                                         .Where(f => f.FaturaTarihi.Date == tarih)
                                         .Sum(f => f.FaturaTutari);
 
-                // Bu tarihte yapılan ödemeleri düş
+                
                 currentBakiye -= musteri.Faturalar
                                         .Where(f => f.OdemeTarihi.HasValue && f.OdemeTarihi.Value.Date == tarih)
                                         .Sum(f => f.FaturaTutari);

@@ -10,19 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// DbContext kaydý
+// DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Repository'leri kaydet
+
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IMusteriTanimRepository, MusteriTanimRepository>();
 
-// Application Services'ý kaydet
+
 builder.Services.AddScoped<IMusteriService, MusteriService>();
 
-// AutoMapper'ý kaydet
-builder.Services.AddAutoMapper(typeof(MappingProfile)); // Application katmanýndaki MappingProfile'ý kullan
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 
